@@ -3,8 +3,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Warning: this repository is going to shut down soon
+        jcenter() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "FoodStore"
+rootProject.name = "JetComposeLoginUI"
 include ':app'
