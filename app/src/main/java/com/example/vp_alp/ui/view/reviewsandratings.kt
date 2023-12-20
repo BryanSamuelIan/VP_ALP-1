@@ -36,8 +36,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -52,9 +51,16 @@ import androidx.compose.ui.unit.sp
 import com.example.vp_alp.R
 import com.example.vp_alp.data.loadNear
 import com.example.vp_alp.model.near
+import androidx.compose.runtime.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Divider
+import com.example.vp_alp.data.loadReview
+import com.example.vp_alp.model.rating
+
 
 @Composable
-fun nearme(nearcardlist:List<near>) {
+fun reviewsandratings(reviewcardlist:List<rating>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,7 +79,7 @@ fun nearme(nearcardlist:List<near>) {
                 modifier = Modifier.padding(end=16.dp)
             )
             Text(
-                text = "Near Me",
+                text = "Reviews and ratings",
                 style = TextStyle(
                     fontSize = 20.sp,
                     lineHeight = 21.sp,
@@ -83,14 +89,29 @@ fun nearme(nearcardlist:List<near>) {
 
                     )
             )
+            Spacer(modifier = Modifier.weight(1f))
+
+            var isLiked by remember { mutableStateOf(false) }
+
+            Box(modifier = Modifier.clickable {
+                isLiked = !isLiked
+            }) {
+                val tint = if (isLiked) Color(0xFFEC407A) else Color(0xFF636363)
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Favorite",
+                    tint = tint
+                )
+            }
+
 
         }
         val context = LocalContext.current
         LazyVerticalGrid(
             columns = GridCells.Fixed(1),
         ) {
-            items(nearcardlist){
-                nearCard(
+            items(reviewcardlist){
+                reviewCard(
                     it,
                     Modifier
                         .padding(4.dp)
@@ -114,122 +135,83 @@ fun nearme(nearcardlist:List<near>) {
 
 
 @Composable
-fun nearCard(near: near, modifier: Modifier = Modifier) {
-    val    context = LocalContext.current
-    Column(modifier = Modifier
-        .padding(vertical = 8.dp)
-        .clickable {
-            Toast.makeText(context, "Do something ", Toast.LENGTH_SHORT).show()
-        })
-    {
-        Row(
-            modifier=Modifier
-                .fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(119.dp)
-                    .height(119.dp)
-                    .clip(RoundedCornerShape(size = 10.dp))
-                    .shadow(
-                        elevation = 4.dp,
-                        spotColor = Color(0x66000000),
-                        ambientColor = Color(0x66000000)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFFFFFFF),
-                        shape = RoundedCornerShape(size = 10.dp)
-                    ))
-            {
-                Image(
-                    painter = painterResource(id = near.image_path),
-                    contentDescription = "Image description",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(size = 10.dp))
-                )
+fun reviewCard(rating: rating, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
+    Column(
+        modifier = modifier
+            .padding(vertical = 8.dp)
+            .clickable {
+                Toast.makeText(context, "Do something", Toast.LENGTH_SHORT).show()
             }
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = rating.image_path),
+                contentDescription = "Image description",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(70.dp) // Set the image size as needed
+                    .clip(RoundedCornerShape(size = 40.dp))
+            )
 
-            Column(modifier= Modifier
-                .padding(10.dp)) {
+            Column(modifier = Modifier.fillMaxSize().padding(start = 20.dp)
+            ) {
                 Text(
-                    text = near.name,
+                    text = rating.username,
                     style = TextStyle(
-                        fontSize = 14.sp,
-                        lineHeight = 21.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFF000000),
-
-                        )
-                )
-                Row(modifier=Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Image(painter = painterResource(id = R.drawable.baseline_star_rate_24), contentDescription = "")
-                    Text(
-                        text = near.rating.toString(),
-                        style = TextStyle(
-                            fontSize = 11.sp,
-                            lineHeight = 21.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFF000000),
-
-                            )
-                    )
-                }
-
-                Text(
-                    text = near.phone,
-                    style = TextStyle(
-                        fontSize = 11.sp,
+                        fontSize = 18.sp,
                         lineHeight = 21.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFF000000),
-
-                        ),
-                    modifier=Modifier.padding(bottom = 2.dp)
-                )
-                Text(
-                    text = near.address,
-                    style = TextStyle(
-                        fontSize = 11.sp,
-                        lineHeight = 21.sp,
-                        fontWeight = FontWeight(400),
-                        color = Color(0xFF000000),
-
-                        ),
-                            maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    ), modifier = Modifier.padding(vertical= 5.dp)
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-
-                    var isLiked by remember { mutableStateOf(false) }
-
-                    Box(modifier = Modifier.weight(1f).clickable {
-                        isLiked = !isLiked
-                    }, contentAlignment = Alignment.BottomEnd) {
-                        val tint = if (isLiked) Color(0xFFEC407A) else Color(0xFF636363)
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorite",
-                            tint = tint
+                    Text(
+                        text = "Rating:",
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            lineHeight = 21.sp,
+                            fontWeight = FontWeight(400),
+                            color = Color(0xFF000000)
+                        ), modifier = Modifier.padding(vertical= 5.dp)
+                    )
+                    var stars = rating.rating
+                    for (i in 1..stars) {
+                        Image(
+                            painter = painterResource(id = R.drawable.baseline_star_rate_24),
+                            modifier=Modifier.size(20.dp),
+                            contentDescription = ""
                         )
                     }
                 }
             }
 
-
-
-
-
         }
-
+        Text(
+            text = "Comments: "+ rating.contex,
+            style = TextStyle(
+                fontSize = 12.sp,
+                lineHeight = 21.sp,
+                fontWeight = FontWeight(400),
+                color = Color(0xFF000000)
+            ), modifier = Modifier.padding(20.dp)
+        )
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color.Gray)
+        )
     }
+
 }
+
 
 
 
@@ -242,7 +224,8 @@ fun nearCard(near: near, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun nearmePreview(){
-    nearme(loadNear())
+fun reviewandratingsPreview(){
+    reviewsandratings(loadReview())
 
 }
+
